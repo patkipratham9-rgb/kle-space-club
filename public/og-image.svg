@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#141517"/>
+  <!-- Grid overlay -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E1F22" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)" />
+  
+  <!-- Outer border -->
+  <rect x="24" y="24" width="1152" height="582" stroke="#D95D24" stroke-width="4" fill="none"/>
+  
+  <!-- Corner screw accents -->
+  <text x="44" y="60" fill="#D95D24" font-family="monospace" font-size="20" font-weight="bold">[+] SPEC-MIL-810</text>
+  <text x="960" y="60" fill="#A0A5AD" font-family="monospace" font-size="20">[+] FLIGHT_SYS_REV_84</text>
+  
+  <!-- Main Chassis Card -->
+  <rect x="120" y="130" width="960" height="370" fill="#F2EFE9" stroke="#1E1F22" stroke-width="4"/>
+  <rect x="130" y="140" width="960" height="370" fill="none" stroke="#1E1F22" stroke-width="2"/>
+  
+  <!-- Insignia -->
+  <rect x="160" y="180" width="80" height="80" fill="#D95D24" stroke="#1E1F22" stroke-width="3"/>
+  <path d="M200 195 L225 240 L210 234 L200 252 L190 234 L175 240 Z" fill="#F2EFE9"/>
+  
+  <!-- Typography -->
+  <text x="260" y="215" fill="#1E1F22" font-family="sans-serif" font-size="42" font-weight="900" letter-spacing="3">ASTRAEA SPACE LAB</text>
+  <text x="260" y="248" fill="#D95D24" font-family="monospace" font-size="20" font-weight="bold">FLIGHT OPERATIONS &amp; ATTENDANCE TELEMETRY</text>
+  
+  <text x="160" y="320" fill="#525760" font-family="monospace" font-size="18">NASA-PUNK UNIVERSITY OPERATIONS CONSOLE • AUTONOMOUS ROBOTICS • HIGH-POWER ROCKETRY • CUBESATS</text>
+  
+  <!-- Divisions Badges -->
+  <rect x="160" y="370" width="240" height="48" fill="#3A6B5C" stroke="#1E1F22" stroke-width="2"/>
+  <text x="180" y="401" fill="#FFFFFF" font-family="monospace" font-size="16" font-weight="bold">DIV-01 // ROBOTICS</text>
+  
+  <rect x="420" y="370" width="240" height="48" fill="#D95D24" stroke="#1E1F22" stroke-width="2"/>
+  <text x="440" y="401" fill="#FFFFFF" font-family="monospace" font-size="16" font-weight="bold">DIV-02 // ROCKETRY</text>
+  
+  <rect x="680" y="370" width="280" height="48" fill="#E29526" stroke="#1E1F22" stroke-width="2"/>
+  <text x="700" y="401" fill="#1E1F22" font-family="monospace" font-size="16" font-weight="bold">DIV-03 // ASTRONAUTICS</text>
+  
+  <!-- Footer Bar -->
+  <text x="44" y="580" fill="#6E737D" font-family="monospace" font-size="16">ORBITAL-7 FLIGHT CONTROLLER • POSTGRESQL / SUPABASE RLS VERIFIED</text>
+  <text x="1000" y="580" fill="#4ADE80" font-family="monospace" font-size="16">STATUS: ONLINE</text>
+</svg>

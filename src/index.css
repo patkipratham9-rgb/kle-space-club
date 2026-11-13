@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    border-color: #1E1F22;
+  }
+  
+  body {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    background-color: #141517;
+    color: #1E1F22;
+    overflow-x: hidden;
+  }
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  }
+  
+  .font-display {
+    font-family: 'Orbitron', 'Michroma', sans-serif;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* ==========================================================================
+   1970s/80s CASSETTE FUTURISM ("NASA-PUNK") DESIGN SYSTEM
+   ========================================================================== */
+
+/* Vintage Flight Deck Console Rack Background */
+.nasa-rack-bg {
+  background-color: #141517;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(217, 93, 36, 0.08) 0%, transparent 60%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
+}
+
+/* Hard Mechanical Drop Shadows */
+.hard-shadow {
+  box-shadow: 3px 3px 0px #1E1F22;
+}
+
+.hard-shadow-sm {
+  box-shadow: 2px 2px 0px #1E1F22;
+}
+
+.hard-shadow-lg {
+  box-shadow: 5px 5px 0px #1E1F22;
+}
+
+.hard-shadow-orange {
+  box-shadow: 3px 3px 0px #D95D24;
+}
+
+.hard-shadow-amber {
+  box-shadow: 3px 3px 0px #E29526;
+}
+
+.hard-shadow-teal {
+  box-shadow: 3px 3px 0px #3A6B5C;
+}
+
+/* Primary Chassis Card: Vintage Computer Beige */
+.beige-chassis {
+  background-color: #F2EFE9;
+  border: 2px solid #1E1F22;
+  border-radius: 4px;
+}
+
+.beige-chassis-darker {
+  background-color: #E6E1D6;
+  border: 2px solid #1E1F22;
+  border-radius: 4px;
+}
+
+/* Deep Charcoal / CRT Phosphor Display */
+.crt-screen {
+  background-color: #0E0F12;
+  border: 2px solid #1E1F22;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* CRT Scanline Effect */
+.crt-screen::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Phosphor Glows */
+.phosphor-amber {
+  color: #FFAE19;
+  text-shadow: 0 0 8px rgba(255, 174, 25, 0.5);
+}
+
+.phosphor-green {
+  color: #4ADE80;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+}
+
+.phosphor-cyan {
+  color: #38BDF8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+.phosphor-orange {
+  color: #FB923C;
+  text-shadow: 0 0 8px rgba(251, 146, 60, 0.5);
+}
+
+/* Mechanical Push Buttons */
+.mechanical-btn {
+  border: 2px solid #1E1F22;
+  box-shadow: 3px 3px 0px #1E1F22;
+  transition: all 0.08s ease-in-out;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.mechanical-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #1E1F22;
+}
+
+.mechanical-btn:active:not(:disabled), .mechanical-btn.active-depressed {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #1E1F22;
+}
+
+/* Hazard Stripe Warning Banner */
+.hazard-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    #D95D24,
+    #D95D24 10px,
+    #1E1F22 10px,
+    #1E1F22 20px
+  );
+}
+
+.hazard-stripes-amber {
+  background: repeating-linear-gradient(
+    -45deg,
+    #E29526,
+    #E29526 10px,
+    #1E1F22 10px,
+    #1E1F22 20px
+  );
+}
+
+/* Barcode Graphic */
+.barcode-strip {
+  background: repeating-linear-gradient(
+    90deg,
+    #1E1F22,
+    #1E1F22 2px,
+    transparent 2px,
+    transparent 4px,
+    #1E1F22 4px,
+    #1E1F22 7px,
+    transparent 7px,
+    transparent 9px
+  );
+  height: 14px;
+}
+
+/* Custom Scrollbar for CRT and Avionics */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141517;
+  border-left: 1px solid #1E1F22;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3A3D45;
+  border: 1px solid #1E1F22;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D95D24;
+}

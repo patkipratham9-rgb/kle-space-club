@@ -1,0 +1,10 @@
+# 301 Permanent Redirects for legacy and alias routes
+/home         /              301!
+/index.html   /              301!
+/roster       /members       301!
+/directives   /tasks         301!
+/privacy      /rules         301!
+/terms        /rules         301!
+
+# SPA 200 Rewrite for client routing
+/*            /index.html    200
