@@ -269,7 +269,7 @@ export const MemberManagement = ({ isAddModalOpen, setIsAddModalOpen }) => {
               <div className="p-2.5 bg-[#D95D24] text-white border-2 border-[#1E1F22] hard-shadow-sm">
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-black font-display text-[#1E1F22]">DECOMMISSION FLIGHT SPECIALIST?</h3>
+              <h3 className="text-base font-black font-display text-[#1E1F22]">DELETE RECORD</h3>
             </div>
             <p className="text-xs font-mono text-[#525760] leading-relaxed mb-6">
               Confirm discharge of <strong className="text-[#1E1F22]">[{deleteConfirmMember.full_name}]</strong> ({deleteConfirmMember.student_id}) from the Space Club manifest. This will expunge all task assignments and database references.
