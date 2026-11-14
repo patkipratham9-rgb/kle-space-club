@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Rocket, AlertTriangle, ArrowRight, Lock, ShieldAlert } from 'lucide-react';
+import { Rocket, ArrowRight, Lock, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/useApp';
 
 const STORAGE_LOCK_KEY = 'spaceclub_login_lockout_v2';
@@ -27,7 +27,6 @@ export const LoginGateway = () => {
   const { login } = useApp();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [lockout, setLockout] = useState(getStoredLockout);
   const [now, setNow] = useState(() => Date.now());
@@ -53,31 +52,26 @@ export const LoginGateway = () => {
     e.preventDefault();
     if (isLocked || isAuthenticating) return;
 
-    setError('');
     setIsAuthenticating(true);
 
     try {
       const res = await login(username, password);
 
       if (res.success) {
-        // Reset lockout records completely on successful verification
         localStorage.removeItem(STORAGE_LOCK_KEY);
         setLockout({ failedAttempts: 0, lockoutMultiplier: 0, lockedUntil: 0 });
         return;
       }
 
-      // Check if backend rejected with 429 lockout
       if (res.status === 429) {
         const nextMultiplier = res.lockoutMultiplier || (lockout.lockoutMultiplier || 0) + 1;
         const lockedUntil = res.lockedUntil || (Date.now() + (res.retryAfter || (nextMultiplier * 180)) * 1000);
         const nextState = { failedAttempts: 0, lockoutMultiplier: nextMultiplier, lockedUntil };
         setLockout(nextState);
         saveStoredLockout(nextState);
-        setError(res.error || `SECURITY LOCKOUT ENGAGED: Excessive failed attempts. Cooldown: ${nextMultiplier * 3} minutes.`);
         return;
       }
 
-      // Local attempt increment
       const newAttempts = (lockout.failedAttempts || 0) + 1;
       if (newAttempts >= MAX_ATTEMPTS) {
         const nextMultiplier = (lockout.lockoutMultiplier || 0) + 1;
@@ -86,14 +80,10 @@ export const LoginGateway = () => {
         const nextState = { failedAttempts: 0, lockoutMultiplier: nextMultiplier, lockedUntil };
         setLockout(nextState);
         saveStoredLockout(nextState);
-        setError(`BOT MITIGATION ACTIVATED: Limit of ${MAX_ATTEMPTS} attempts reached. Terminal locked for ${nextMultiplier * 3} minutes.`);
       } else {
         const nextState = { ...lockout, failedAttempts: newAttempts };
         setLockout(nextState);
         saveStoredLockout(nextState);
-        const remaining = MAX_ATTEMPTS - newAttempts;
-        const nextTimerMins = ((lockout.lockoutMultiplier || 0) + 1) * 3;
-        setError(`${res.error || 'INVALID CREDENTIALS'} (${newAttempts}/${MAX_ATTEMPTS} attempts. ${remaining} left before ${nextTimerMins}-min cooldown).`);
       }
     } catch (err) {
       if (err.status === 429) {
@@ -102,9 +92,6 @@ export const LoginGateway = () => {
         const nextState = { failedAttempts: 0, lockoutMultiplier: nextMultiplier, lockedUntil };
         setLockout(nextState);
         saveStoredLockout(nextState);
-        setError(err.message || `SECURITY LOCKOUT ENGAGED. Cooldown in progress.`);
-      } else {
-        setError(err.message || 'COMMUNICATION / SECURITY FAULT');
       }
     } finally {
       setIsAuthenticating(false);
@@ -153,17 +140,6 @@ export const LoginGateway = () => {
                     <span>DURATION: {lockout.lockoutMultiplier * 3} MINS</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Standard Error Message when not locked */}
-          {!isLocked && error && (
-            <div className="p-3 mb-5 bg-[#D95D24]/15 border-2 border-[#D95D24] hard-shadow-sm text-xs font-mono text-[#1E1F22] flex items-start gap-2.5 animate-in fade-in duration-100">
-              <AlertTriangle className="w-4 h-4 text-[#D95D24] shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <span className="font-bold block text-[#D95D24]">ACCESS REJECTED // 0x401</span>
-                <span className="text-[11px] text-[#525760]">{error}</span>
               </div>
             </div>
           )}
