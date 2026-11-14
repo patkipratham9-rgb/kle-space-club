@@ -8,7 +8,8 @@ const KEYS = {
   ATTENDANCE: 'spaceclub_cassette_attendance_v2',
   TASKS: 'spaceclub_cassette_tasks_v2',
   ACTIVE_USER: 'spaceclub_cassette_active_user_v2',
-  AUTH: 'spaceclub_session_auth_status'
+  AUTH: 'spaceclub_session_auth_status',
+  TAB: 'spaceclub_current_tab_v2'
 };
 
 const loadStored = (k, fallback) => {
@@ -22,13 +23,26 @@ const saveStored = (k, v) => {
   try { localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) { void e; }
 };
 
+const checkInitialAuth = () => {
+  try {
+    const auth = localStorage.getItem(KEYS.AUTH) || sessionStorage.getItem(KEYS.AUTH);
+    const token = getStoredToken();
+    const user = localStorage.getItem(KEYS.ACTIVE_USER);
+    return auth === 'true' && Boolean(token || user);
+  } catch {
+    return false;
+  }
+};
+
 export const AppProvider = ({ children }) => {
   const [members, setMembers] = useState(() => loadStored(KEYS.MEMBERS, INITIAL_PROFILES));
   const [attendance, setAttendance] = useState(() => loadStored(KEYS.ATTENDANCE, INITIAL_ATTENDANCE));
   const [tasks, setTasks] = useState(() => loadStored(KEYS.TASKS, INITIAL_TASKS));
   const [currentOperator, setCurrentOperator] = useState(() => loadStored(KEYS.ACTIVE_USER, DEFAULT_ADMIN));
-  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getStoredToken()) && sessionStorage.getItem(KEYS.AUTH) === 'true');
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(checkInitialAuth);
+  const [currentTab, setCurrentTab] = useState(() => {
+    try { return localStorage.getItem(KEYS.TAB) || 'dashboard'; } catch { return 'dashboard'; }
+  });
   const [selectedDate, setSelectedDate] = useState(getDateString(0));
   const [toasts, setToasts] = useState([]);
   const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
@@ -45,10 +59,11 @@ export const AppProvider = ({ children }) => {
             try {
               const verifyRes = await api.verifySession();
               if (verifyRes.success && active) setIsAuthenticated(true);
-            } catch {
-              if (active) {
+            } catch (err) {
+              if (err.status === 401 && active) {
                 setStoredToken(null);
                 setIsAuthenticated(false);
+                localStorage.removeItem(KEYS.AUTH);
                 sessionStorage.removeItem(KEYS.AUTH);
               }
             }
@@ -71,6 +86,18 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { saveStored(KEYS.ATTENDANCE, attendance); }, [attendance]);
   useEffect(() => { saveStored(KEYS.TASKS, tasks); }, [tasks]);
   useEffect(() => { saveStored(KEYS.ACTIVE_USER, currentOperator); }, [currentOperator]);
+  useEffect(() => {
+    try { localStorage.setItem(KEYS.TAB, currentTab); } catch (e) { void e; }
+  }, [currentTab]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      localStorage.setItem(KEYS.AUTH, 'true');
+      sessionStorage.setItem(KEYS.AUTH, 'true');
+    } else {
+      localStorage.removeItem(KEYS.AUTH);
+      sessionStorage.removeItem(KEYS.AUTH);
+    }
+  }, [isAuthenticated]);
 
   const playClick = () => {
     try {
@@ -109,6 +136,7 @@ export const AppProvider = ({ children }) => {
       timer = setTimeout(() => {
         setIsAuthenticated(false);
         setStoredToken(null);
+        localStorage.removeItem(KEYS.AUTH);
         sessionStorage.removeItem(KEYS.AUTH);
         addToast('SECURITY AUTO-LOCK ENGAGED', 'Terminal locked due to 15 minutes of inactivity.', 'warning');
       }, 15 * 60 * 1000);
@@ -129,6 +157,7 @@ export const AppProvider = ({ children }) => {
       if (res.success && res.token) {
         setStoredToken(res.token);
         setIsAuthenticated(true);
+        localStorage.setItem(KEYS.AUTH, 'true');
         sessionStorage.setItem(KEYS.AUTH, 'true');
         const userObj = res.user || {};
         const fullProfile = members.find(m => m.id === userObj.id) || { ...DEFAULT_ADMIN, ...userObj, role: userObj.role || 'member' };
@@ -143,7 +172,10 @@ export const AppProvider = ({ children }) => {
       return { success: false, error: 'Authorization rejected.' };
     } catch (err) {
       if (u.toLowerCase() === 'admin' && p === 'SC_2026') {
+        const offlineToken = 'offline_token_' + Date.now();
+        setStoredToken(offlineToken);
         setIsAuthenticated(true);
+        localStorage.setItem(KEYS.AUTH, 'true');
         sessionStorage.setItem(KEYS.AUTH, 'true');
         setCurrentOperator(DEFAULT_ADMIN);
         addToast('STANDALONE BACKUP CLEARANCE', 'Offline Level-5 access enabled.', 'warning');
@@ -164,6 +196,7 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     setIsAuthenticated(false);
     setStoredToken(null);
+    localStorage.removeItem(KEYS.AUTH);
     sessionStorage.removeItem(KEYS.AUTH);
     addToast('CONSOLE TERMINATED // LOCKED', 'Terminal session ended.', 'info');
   };

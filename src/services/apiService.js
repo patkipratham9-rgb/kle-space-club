@@ -5,7 +5,7 @@ const TOKEN_KEY = 'spaceclub_session_token';
 
 export const getStoredToken = () => {
   try {
-    return sessionStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
   } catch {
     return null;
   }
@@ -14,12 +14,14 @@ export const getStoredToken = () => {
 export const setStoredToken = (token) => {
   try {
     if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
       sessionStorage.setItem(TOKEN_KEY, token);
     } else {
+      localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);
     }
-  } catch {
-    // SessionStorage fallback
+  } catch (e) {
+    void e;
   }
 };
 
