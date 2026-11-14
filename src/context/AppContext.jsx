@@ -150,7 +150,14 @@ export const AppProvider = ({ children }) => {
         return { success: true, role: 'admin' };
       }
       addToast('SECURITY ACCESS REJECTED', err.message || 'Invalid credentials.', 'warning');
-      return { success: false, error: err.message || 'Invalid username or password.' };
+      return { 
+        success: false, 
+        error: err.message || 'Invalid username or password.',
+        status: err.status,
+        retryAfter: err.retryAfter,
+        lockedUntil: err.lockedUntil,
+        lockoutMultiplier: err.lockoutMultiplier
+      };
     }
   };
 

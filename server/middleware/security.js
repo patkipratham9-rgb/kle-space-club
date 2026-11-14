@@ -2,8 +2,8 @@ import { verifySessionToken } from '../security.js';
 
 // In-memory rate-limiter store for brute-force protection
 const loginAttempts = new Map();
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes lockout
+const MAX_ATTEMPTS = 3;
+const BASE_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes base cooldown
 
 /**
  * Helmet-equivalent standard security headers middleware.
@@ -23,33 +23,44 @@ export function securityHeaders(req, res, next) {
 }
 
 /**
- * Rate limiter middleware targeting auth endpoints to thwart brute-force password cracking.
+ * Rate limiter middleware targeting auth endpoints to thwart brute-force password cracking and bots.
+ * Limits login to 3 attempts, with an escalating cooldown timer starting at 3 minutes.
  */
 export function loginRateLimiter(req, res, next) {
   const ip = req.ip || req.connection?.remoteAddress || '127.0.0.1';
   const now = Date.now();
   const record = loginAttempts.get(ip);
 
-  if (record) {
-    // If lockout window has expired, reset counter
-    if (now - record.firstAttemptTime > LOCKOUT_WINDOW_MS) {
-      loginAttempts.delete(ip);
-    } else if (record.count >= MAX_ATTEMPTS) {
-      const waitMinutes = Math.ceil((LOCKOUT_WINDOW_MS - (now - record.firstAttemptTime)) / 60000);
-      res.setHeader('Retry-After', Math.ceil((LOCKOUT_WINDOW_MS - (now - record.firstAttemptTime)) / 1000));
-      return res.status(429).json({
-        error: `SECURITY LOCKOUT ENGAGED: Excessive failed authentication attempts. Access suspended for ${waitMinutes} minute(s).`
-      });
-    }
+  // If in active cooldown, reject immediately with 429
+  if (record && record.lockedUntil && now < record.lockedUntil) {
+    const remainingSeconds = Math.ceil((record.lockedUntil - now) / 1000);
+    const remainingMinutes = Math.ceil(remainingSeconds / 60);
+    const multiplier = record.lockoutMultiplier || 1;
+    res.setHeader('Retry-After', remainingSeconds);
+    return res.status(429).json({
+      error: `SECURITY LOCKOUT ENGAGED: Excessive failed attempts (limit: ${MAX_ATTEMPTS}). Bot defense active. Cooldown in progress: ${remainingMinutes}m (${remainingSeconds}s remaining). Tier ${multiplier}x.`,
+      retryAfter: remainingSeconds,
+      lockedUntil: record.lockedUntil,
+      lockoutMultiplier: multiplier
+    });
   }
 
   // Hook to record failed attempts
   res.on('finish', () => {
     if (res.statusCode === 401) {
-      const current = loginAttempts.get(ip) || { count: 0, firstAttemptTime: now };
+      const current = loginAttempts.get(ip) || { count: 0, lockoutMultiplier: 0, lockedUntil: 0 };
       current.count += 1;
+
+      if (current.count >= MAX_ATTEMPTS) {
+        current.lockoutMultiplier = (current.lockoutMultiplier || 0) + 1;
+        // Escalating cooldown: 3 min (1st lockout), 6 min (2nd lockout), 9 min (3rd lockout), etc.
+        const cooldownDuration = current.lockoutMultiplier * BASE_COOLDOWN_MS;
+        current.lockedUntil = Date.now() + cooldownDuration;
+        current.count = 0; // reset attempts for after cooldown
+        console.warn(`[Security Alert] IP ${ip} reached ${MAX_ATTEMPTS} failed attempts. Cooldown locked for ${cooldownDuration / 60000} mins (Multiplier: ${current.lockoutMultiplier}x).`);
+      }
+
       loginAttempts.set(ip, current);
-      console.warn(`[Security Alert] Failed login attempt from ${ip} (${current.count}/${MAX_ATTEMPTS})`);
     } else if (res.statusCode === 200) {
       // Clear on successful login
       loginAttempts.delete(ip);

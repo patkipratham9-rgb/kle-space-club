@@ -37,7 +37,12 @@ const req = async (path, method = 'GET', body) => {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Request failed: ${res.statusText}`);
+    const errorObj = new Error(err.error || `Request failed: ${res.statusText}`);
+    errorObj.status = res.status;
+    errorObj.retryAfter = err.retryAfter;
+    errorObj.lockedUntil = err.lockedUntil;
+    errorObj.lockoutMultiplier = err.lockoutMultiplier;
+    throw errorObj;
   }
   return res.json();
 };
